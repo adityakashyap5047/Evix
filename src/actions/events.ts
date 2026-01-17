@@ -1,3 +1,5 @@
+"use server";
+
 import { db } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
@@ -17,18 +19,16 @@ export async function getEvents(page = 1, limit = 10) {
                 orderBy: {
                     startDate: "desc"
                 },
-                skip: (page - 1) * limit,
-                take: limit,
             }),
             db.event.count({
                 where: { startDate: { gte: now } }
             })
         ]);
 
-        const featured = events.sort((a, b) => b.registrationCount - a.registrationCount);
+        const featured = [...events].sort((a, b) => b.registrationCount - a.registrationCount);
         const totalPages = Math.ceil(total / limit);
 
-        return ({success: true, data:{ events, featured, page, limit, total, totalPages }, status: 200 });
+        return ({success: true, data:{ events: events.slice((page - 1) * limit, page * limit), featured: featured.slice((page - 1) * limit, page * limit), page, limit, total, totalPages }, status: 200 });
     } catch (error) {
         return { success: false, error: `Error occurred while fetching events: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
     }
@@ -49,7 +49,7 @@ export async function getAllEvents(page = 1, limit = 10) {
             db.event.count()
         ]);
 
-        const featured = events.sort((a, b) => b.registrationCount - a.registrationCount);
+        const featured = [...events].sort((a, b) => b.registrationCount - a.registrationCount);
         const totalPages = Math.ceil(total / limit);
 
         return { success: true, data: { events, featured, page, limit, total, totalPages }, status: 200 };
@@ -155,4 +155,29 @@ export async function getEventsByCategory(
         status: 500,
     };
   }
+}
+
+export async function getCateogyCount(){
+    try {
+
+        const now = new Date();
+        const events = await db.event.findMany({
+            where: {startDate: { gte: now } },
+        })
+
+        const counts: { [key: string]: number } = {};
+        events.forEach((event) => {
+            counts[event.category] = (counts[event.category] || 0) + 1;
+        });
+
+        return { success: true, data: { counts }, status: 200 };
+    } catch (error) {
+        return {
+            success: false,
+            error: `Error occurred while fetching events based on Category: ${
+                error instanceof Error ? error.message : "Unknown error"
+            }`,
+            status: 500,
+        };
+    }
 }
