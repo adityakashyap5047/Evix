@@ -1,3 +1,5 @@
+import { City, State } from "country-state-city";
+
 export function createLocationSlug(city: string, state: string){
     if(!city || !state) return "";
 
@@ -5,4 +7,37 @@ export function createLocationSlug(city: string, state: string){
     const stateSlug = state.toLowerCase().replace(/\s+/g, '-');
 
     return `${citySlug}-${stateSlug}`;
+}
+
+export function parseLocationSlug(slug: string){
+    if(!slug || typeof slug !== 'string') 
+        return {city: null, state: null, isValid: false};
+    
+    const parts = slug.split('-');
+    if(parts.length < 2)
+        return {city: null, state: null, isValid: false};
+
+    const cityName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1).replace(/-/g, ' ');
+    const stateName = parts.slice(1).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' ').replace(/-/g, ' ');
+
+    const indianStates = State.getStatesOfCountry("IN");
+
+    const stateObj = indianStates.find(
+        (s) => s.name.toLowerCase() === stateName.toLowerCase()
+    )
+
+    if(!stateObj){
+        return {city: null, state: null, isValid: false};
+    }
+
+    const cities = City.getCitiesOfState("IN", stateObj.isoCode);
+    const cityExists = cities.some(
+        (c) => c.name.toLowerCase() === cityName.toLowerCase()
+    )
+
+    if(!cityExists){
+        return {city: null, state: null, isValid: false};
+    }
+
+    return {city: cityName, state: stateName, isValid: true};
 }
