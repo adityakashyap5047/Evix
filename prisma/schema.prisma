@@ -60,6 +60,7 @@ model Event{
   address String?
   city String?
   state String?
+  country String?
 
   capacity Int?
   ticketType TicketType
