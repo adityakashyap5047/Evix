@@ -63,7 +63,7 @@ const Page = () => {
                 4,
             ],
         },
-    );;
+    );
 
     const { data: popularEvents, loading: loadingPopularEvents } = useFetch(
         getEvents,
