@@ -83,7 +83,7 @@ const Page = () => {
         const state = currentUser?.location?.state;
 
         const slug = createLocationSlug(city ?? "", state ?? "");
-        router.push(`/events/${slug}`);
+        router.push(`/explore/${slug}`);
     }
 
     const categoriesWithCounts = CATEGORIES.map((cat) => {
@@ -94,7 +94,7 @@ const Page = () => {
     })
 
     const handleCategoryClick = (categoryId: string) => {
-        router.push(`/events/${categoryId}`);
+        router.push(`/explore/${categoryId}`);
     }
 
     const isLoading = loadingFeaturedEvents || loadingLocalEvents || loadingPopularEvents;

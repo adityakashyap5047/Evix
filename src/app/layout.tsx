@@ -5,6 +5,7 @@ import Footer from "@/components/footer";
 import Header from "@/components/header";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Evix",
@@ -36,13 +37,14 @@ export default function RootLayout({
             }}
           >
           <Header />
-          <main className="relative flex flex-col min-h-screen container max-w-5xl mx-auto pt-40 md:pt-32">
+          <main className="relative flex flex-col min-h-screen container max-w-7xl mx-auto pt-40 md:pt-32">
             <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
               <div className="absolute left-1/4 top-0 h-96 w-96 bg-pink-600/20 rounded-full blur-3xl" />
               <div className="absolute right-1/4 bottom-0 h-96 w-96 bg-orange-600/20 rounded-full blur-3xl" />
             </div>
 
             <div className="relative z-10 flex-1">{children}</div>
+            <Toaster richColors />
             <Footer />
           </main>
           </ClerkProvider>
