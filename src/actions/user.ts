@@ -12,6 +12,11 @@ export async function getCurrentUser(clerkUserId: string) {
         const user = await db.user.findUnique({
             where: {
                 clerkUserId
+            }, 
+            include: {
+                location: {
+                    include: {user: true}
+                }
             }
         });
 

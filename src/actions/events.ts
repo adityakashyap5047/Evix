@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/prisma";
+import { currentUser } from "@clerk/nextjs/server";
 import { Prisma } from "@prisma/client";
 
 export async function getEvents(page = 1, limit = 10) {
@@ -68,6 +69,7 @@ export async function getEventsByLocation(
   city: string | null,
   state: string | null,
   country: string | null,
+  localEvents: boolean = false,
   page = 1,
   limit = 10
 ) {
@@ -76,10 +78,33 @@ export async function getEventsByLocation(
       return { success: false, error: "Page and limit must be positive integers", status: 400 };
     }
 
+    const currUser = await currentUser();
+    if(!currUser || !currUser.id){
+        return { success: false, error: "User not authenticated", status: 401 };
+    }
+
+    const user = await db.user.findUnique({
+        where: {
+            clerkUserId: currUser.id,
+        },
+        include: {
+            location: true,
+        }
+    })
+
     const now = new Date();
 
     const orConditions: Prisma.EventWhereInput[] = [];
 
+    if(localEvents && !city) {
+        orConditions.push({city: {equals: user?.location?.city || "", mode: "insensitive"}});
+    }
+    if(localEvents && !state) {
+        orConditions.push({state: {equals: user?.location?.state || "", mode: "insensitive"}});
+    }
+    if(localEvents && !country) {
+        orConditions.push({country: {equals: user?.location?.country || "", mode: "insensitive"}});
+    }
     if (city) {
       orConditions.push({ city: { equals: city, mode: "insensitive" } });
     }

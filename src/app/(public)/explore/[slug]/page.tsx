@@ -37,7 +37,7 @@ const Page = () => {
         if (isCategory) {
             return getEventsByCategory(slug, page, limit);
         } else {
-            return getEventsByLocation(city, state, "", page, limit);
+            return getEventsByLocation(city, state, "", false, page, limit);
         }
     };
 

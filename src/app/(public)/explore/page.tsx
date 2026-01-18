@@ -59,6 +59,7 @@ const Page = () => {
                 currentUser?.location?.city ?? "",
                 currentUser?.location?.state ?? "",
                 "",
+                true,
                 1,
                 4,
             ],
