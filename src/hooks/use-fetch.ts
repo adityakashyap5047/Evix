@@ -50,7 +50,7 @@ const useFetch = <T, Args extends unknown[] = unknown[]>(
             fn(...args);
         }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [autoFetch]);
+    }, [autoFetch, ...args]);
 
     return { data, loading, error, fn, setData };
 };

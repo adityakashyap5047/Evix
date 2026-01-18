@@ -3,15 +3,17 @@
 import { db } from "@/lib/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 
-export async function getCurrentUser(clerkUserId: string) {
+export async function getCurrentUser() {
     try {
-        if (!clerkUserId) {
-            return { success: false, error: "Clerk User ID is required", status: 400 };
+        const currUser = await currentUser();
+
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
         }
 
         const user = await db.user.findUnique({
             where: {
-                clerkUserId
+                clerkUserId: currUser?.id,
             }, 
             include: {
                 location: {

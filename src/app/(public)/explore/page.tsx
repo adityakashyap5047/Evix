@@ -16,10 +16,9 @@ import {
 } from "@/components/ui/carousel";
 import useFetch from "@/hooks/use-fetch";
 import { User } from "@/lib/Type";
-import { useUser } from "@clerk/nextjs";
 import { ArrowRight, Calendar, Loader2, MapPin, Users } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import Autoplay from "embla-carousel-autoplay";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
@@ -30,20 +29,11 @@ import { CATEGORIES } from "@/lib/data";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Page = () => {
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
     const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
     const router = useRouter();
 
-    const { user, isLoaded } = useUser();
-    const clerkUserId = user?.id;
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await getCurrentUser(clerkUserId ?? "");
-            setCurrentUser(response.data?.user || null);
-        };
-        fetchData();
-    }, [isLoaded, clerkUserId]);
+    const { data: currentUserData } = useFetch(getCurrentUser);
+    const currentUser: User | null = currentUserData?.user || null;
 
     const { data: featuredEvents, loading: loadingFeaturedEvents } = useFetch(
         getEvents,
@@ -73,7 +63,7 @@ const Page = () => {
         },
     );
 
-    const { data: categoryCounts } = useFetch(getCateogyCount);
+    const { data: categoryCounts, loading: loadingCategoryCounts } = useFetch(getCateogyCount);
 
     const handleEventClick = (slug: string) => {
         router.push(`/events/${slug}`);
@@ -98,7 +88,7 @@ const Page = () => {
         router.push(`/explore/${categoryId}`);
     }
 
-    const isLoading = loadingFeaturedEvents || loadingLocalEvents || loadingPopularEvents;
+    const isLoading = loadingFeaturedEvents || loadingLocalEvents || loadingPopularEvents || loadingCategoryCounts;
 
     if (isLoading) {
         return (
@@ -221,7 +211,7 @@ const Page = () => {
                 </div>
             )}
 
-            <div className="mb-16">
+            {!loadingCategoryCounts && categoryCounts && Object.keys(categoryCounts?.counts || {}).length > 0 && <div className="mb-16">
                 <h2 className="text-3xl font-bold mb-6">Browse by Category</h2>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
@@ -245,7 +235,7 @@ const Page = () => {
                         </Card>
                     ))}
                 </div>
-            </div>
+            </div>}
 
             {popularEvents?.featured && popularEvents?.featured.length > 0 && (
                 <div className="mb-16">
@@ -270,6 +260,7 @@ const Page = () => {
             {!loadingFeaturedEvents &&
                 !loadingLocalEvents &&
                 !loadingPopularEvents &&
+                !loadingCategoryCounts &&
                 (!featuredEvents?.events || featuredEvents.events.length === 0) &&
                 (!localEvents?.events || localEvents.events.length === 0) &&
                 (!popularEvents?.events || popularEvents.events.length === 0) && (
