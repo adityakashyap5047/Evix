@@ -23,22 +23,17 @@ export function useOnboarding() {
         const fetchData = async () => {
             const response = await getCurrentUser(clerkUserId ?? "");
             setCurrentUser(response.data?.user || null);
+            if(!response.data?.user?.hasCompletedOnboarding){
+                const requiresOnboarding = ATTENDEE_PAGES.some((page) =>
+                    pathname.startsWith(page)
+                );
+                if(requiresOnboarding){
+                    setShowOnboarding(true);
+                }
+            }
         };
         fetchData();
-    }, [isLoaded, clerkUserId]);
-
-    useEffect(() => {
-        if (isLoaded && !currentUser) return;
-
-        if (!currentUser?.hasCompletedOnboarding) {
-            const requiresOnboarding = ATTENDEE_PAGES.some((page) =>
-                pathname.startsWith(page),
-            );
-            if (requiresOnboarding) {
-                queueMicrotask(() => setShowOnboarding(true));
-            }
-        }
-    }, [isLoaded, currentUser, pathname]);
+    }, [isLoaded, clerkUserId, pathname]);
 
     const fetchData = async () => {
         const response = await getCurrentUser(clerkUserId ?? "");
