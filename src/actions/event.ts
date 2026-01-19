@@ -1,35 +1,11 @@
 "use server";
 
 import { db } from "@/lib/prisma";
-import { LocationType, TicketType } from "@/lib/Type";
+import { EventData } from "@/lib/Type";
 import { validateSlug } from "@/utils/slug";
 import { currentUser } from "@clerk/nextjs/server";
 
-type EventProp = {
-    title: string;
-    description: string;
-    category: string;
-    tags: string[];
-
-    startDate: Date;
-    endDate: Date;
-    timezone: string;
-    
-    locationType: LocationType;
-    venue?: string;
-    address?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-
-    capacity: number;
-    ticketType: TicketType;
-    ticketPrice?: number;
-    coverImageUrl?: string;
-    themeColor?: string;
-}
-
-export async function createEvent(data: EventProp){
+export async function createEvent(data: EventData){
     try {
 
         const { themeColor, title } = data;

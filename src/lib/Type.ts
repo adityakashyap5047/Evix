@@ -74,3 +74,30 @@ export type Registration = {
 	status: RegistrationStatus;
 	registeredAt: Date;
 };
+
+export type EventData = {
+	title: string;
+	description: string;
+	category: string;
+	tags: string[];
+
+	startDate: Date;
+	endDate: Date;
+	timezone: string;
+
+	startTime?: string;
+	endTime?: string;
+	
+	locationType: LocationType;
+	venue?: string;
+	address?: string;
+	city?: string;
+	state?: string;
+	country?: string;
+
+	capacity: number;
+	ticketType: TicketType;
+	ticketPrice?: number;
+	coverImageUrl?: string;
+	themeColor?: string;
+}

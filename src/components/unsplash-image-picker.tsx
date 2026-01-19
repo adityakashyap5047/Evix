@@ -36,7 +36,6 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }: {
                 `https://api.unsplash.com/search/photos?query=${searchQuery}&per_page=12&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
             );
             const data = await response.json();
-            console.log(data.results)
             setImages(data.results || []);
         } catch (error) {
             console.error("Error fetching images:", error);
