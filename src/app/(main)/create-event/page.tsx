@@ -25,6 +25,7 @@ import { CATEGORIES } from "@/lib/data";
 import { Textarea } from "@/components/ui/textarea";
 import UnsplashImagePicker from "@/components/unsplash-image-picker";
 import { toast } from "sonner";
+import AIEventCreator from "./_components/ai-event-creator";
 
 type EventFormData = {
     title: string;
@@ -145,11 +146,8 @@ const CreateEvent = () => {
 
     const onSubmit = async (data: EventFormData) => { 
         try {
-            console.log(data.startDate, data.startTime);
-            console.log(data.endDate, data.endTime);
             const start = combineDateTime(data.startDate, data.startTime ?? "");
             const end = combineDateTime(data.endDate, data.endTime ?? "");
-            console.log("Combined:", start, end);
             if (!start || !end) {
                 toast.error("Please select both date and time for start and end.");
                 return;
@@ -201,6 +199,21 @@ const CreateEvent = () => {
         }
     };
 
+    const handleAIGenerate = (generatedData: {
+        title: string;
+        description: string;
+        category: string;
+        suggestedCapacity: number;
+        suggestedTicketType: "FREE" | "PAID";
+    }) => {
+        setValue("title", generatedData.title);
+        setValue("description", generatedData.description);
+        setValue("category", generatedData.category);
+        setValue("capacity", generatedData.suggestedCapacity);
+        setValue("ticketType", generatedData.suggestedTicketType);
+        toast.success("Event details filled! Customize as needed.");
+    };
+
     return (
         <div
             className="transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-16 lg:-mt-12 lg:rounded-md"
@@ -214,7 +227,7 @@ const CreateEvent = () => {
                         </p>
                     )}
                 </div>
-                {/* <AIEventCreator onEventGenerated={handleAIGenerate} /> */}
+                <AIEventCreator onEventGenerated={handleAIGenerate} />
             </div>
 
             <div className="max-w-6xl mx-auto grid md:grid-cols-[320px_1fr] gap-10">
