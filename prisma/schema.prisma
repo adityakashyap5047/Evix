@@ -26,6 +26,8 @@ model User{
   events Event[] 
   registrations Registration[]
 
+  plan UserPlan @default(FREE)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -99,18 +101,23 @@ model Registration{
   @@index([eventId, userId, qrCode])
 }
 
-enum LocationType{
+enum UserPlan {
+  FREE
+  PRO
+}
+
+enum LocationType {
   ONLINE
   OFFLINE
   HYBRID
 }
 
-enum TicketType{
+enum TicketType {
   FREE
   PAID
 }
 
-enum RegistrationStatus{
+enum RegistrationStatus {
   PENDING
   CONFIRMED
   CANCELLED
