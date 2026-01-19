@@ -21,7 +21,7 @@ export function useOnboarding() {
     useEffect(() => {
         if (!isLoaded || !clerkUserId) return;
         const fetchData = async () => {
-            const response = await getCurrentUser(clerkUserId ?? "");
+            const response = await getCurrentUser();
             setCurrentUser(response.data?.user || null);
             if(!response.data?.user?.hasCompletedOnboarding){
                 const requiresOnboarding = ATTENDEE_PAGES.some((page) =>
@@ -36,7 +36,7 @@ export function useOnboarding() {
     }, [isLoaded, clerkUserId, pathname]);
 
     const fetchData = async () => {
-        const response = await getCurrentUser(clerkUserId ?? "");
+        const response = await getCurrentUser();
         setCurrentUser(response.data?.user || null);
     };
 
