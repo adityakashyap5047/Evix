@@ -2,7 +2,6 @@
 
 import { db } from "@/lib/prisma";
 import { EventData } from "@/lib/Type";
-import { validateSlug } from "@/utils/slug";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function createEvent(data: EventData){
@@ -66,15 +65,14 @@ export async function createEvent(data: EventData){
 
 export async function getEventBySlug(slug: string){
     try {
-        const isValidated = validateSlug(slug);
-        if(!isValidated){
-            return { success: false, error: "Invalid event slug", status: 400 };
-        }
 
         const event = await db.event.findUnique({
             where: {
                 slug
             },
+            include: {
+                organizer: true,
+            }
         });
 
         if(!event){

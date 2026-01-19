@@ -216,7 +216,8 @@ const CreateEvent = () => {
 
     return (
         <div
-            className="transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-16 lg:-mt-12 lg:rounded-md"
+            className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen transition-colors duration-300 px-6 py-8 -mt-6 md:-mt-16 lg:-mt-12 lg:rounded-md"
+            style={{backgroundColor: themeColor}}
         >
             <div className="max-w-6xl mx-auto flex flex-col gap-5 md:flex-row justify-between mb-10">
                 <div>
