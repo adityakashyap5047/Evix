@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import useFetch from "@/hooks/use-fetch";
+import { getImages } from "@/actions/image";
 
 type ImageType = {
     id: string;
@@ -26,27 +28,14 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }: {
     onSelect: (url: string) => void;
 }) {
     const [query, setQuery] = useState("event");
-    const [images, setImages] = useState<ImageType[]>([]);
-    const [loading, setLoading] = useState(false);
 
-    const searchImages = async (searchQuery: string) => {
-        setLoading(true);
-        try {
-            const response = await fetch(
-                `https://api.unsplash.com/search/photos?query=${searchQuery}&per_page=12&client_id=${process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY}`
-            );
-            const data = await response.json();
-            setImages(data.results || []);
-        } catch (error) {
-            console.error("Error fetching images:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {data: images, fn: fetchImages, loading} = useFetch(getImages, {
+        autoFetch: false,
+    });
 
-    const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        searchImages(query);
+        await fetchImages(query)
     };
 
     return (
@@ -79,7 +68,7 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }: {
                         </div>
                     ) : (
                         <div className="grid grid-cols-3 gap-4 py-4">
-                            {images.map((image) => (
+                            {images?.map((image: ImageType) => (
                                 <button
                                     key={image.id}
                                     onClick={() => onSelect(image.urls.regular)}
@@ -97,7 +86,7 @@ export default function UnsplashImagePicker({ isOpen, onClose, onSelect }: {
                         </div>
                     )}
 
-                    {!loading && images.length === 0 && (
+                    {!loading && images?.length === 0 && (
                         <div className="text-center text-muted-foreground py-12">
                             Search for images to get started
                         </div>
