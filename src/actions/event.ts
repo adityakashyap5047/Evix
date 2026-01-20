@@ -179,3 +179,53 @@ export async function deleteEvent(eventId: string){
         return { success: false, error: `Error occurred while deleting event: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
     }
 }
+
+export async function getMyEvents(page: number = 1, limit: number = 10){
+    try {
+        if(page < 1 || limit < 1){
+            return { success: false, error: "Invalid page or limit parameters", status: 400 };
+        }
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const [events, total] = await Promise.all([db.event.findMany({
+            where: {
+                organizerId: user?.id,
+            },
+            include: {
+                organizer: true,
+            },
+            orderBy: {
+                createdAt: "desc"
+            },
+            take: limit,
+            skip: (page - 1) * limit,
+        }), db.event.count({
+            where: {
+                organizerId: user?.id,
+            }
+        })]);
+
+        if(!events || events.length === 0){
+            return { success: false, error: "No events found for this organizer", status: 404 };
+        };
+
+        const totalPages = Math.ceil(total / limit);
+
+        return { success: true, data: { events, totalPages, total, page, limit }, status: 200 };
+    } catch (error) {
+        return { success: false, error: `Error occurred while fetching events: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}

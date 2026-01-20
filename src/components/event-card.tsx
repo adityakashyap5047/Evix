@@ -76,8 +76,9 @@ const EventCard = ({
 
     return (
         <Card
-            className={`overflow-hidden group pt-0 ${!!onClick ? "cursor-pointer hover:shadow-lg transition-all hover:border-purple-500/50" : ""} ${className}`}
+            className={`overflow-hidden group pt-0 flex flex-col min-h-105 ${!!onClick ? "cursor-pointer hover:shadow-lg transition-all hover:border-purple-500/50" : ""} ${className}`}
             onClick={onClick}
+            style={{ height: '100%' }}
         >
             <div className="relative h-48 overflow-hidden">
                 {event.coverImageUrl ? (
@@ -104,7 +105,7 @@ const EventCard = ({
                 </div>
             </div>
 
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex flex-col flex-1">
                 <div>
                     <Badge variant="outline" className="mb-2">
                         {React.createElement(getCategoryIcon(event.category), {})} {getCategoryLabel(event.category)}
@@ -135,8 +136,9 @@ const EventCard = ({
                     </div>
                 </div>
 
+                <div className="flex-1" />
                 {showActions && (
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-2 mt-auto">
                         <Button
                             variant="outline"
                             size="sm"
