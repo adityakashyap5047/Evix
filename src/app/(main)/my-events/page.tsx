@@ -6,7 +6,7 @@ import EventCard from '@/components/event-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import useFetch from '@/hooks/use-fetch';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { toast } from 'sonner';
@@ -18,6 +18,16 @@ import {
     PaginationPrevious,
     PaginationNext,
 } from '@/components/ui/pagination';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+    DialogClose,
+} from '@/components/ui/dialog';
+import { useState } from 'react';
 
 const MyEventPage = () => {
 
@@ -27,26 +37,34 @@ const MyEventPage = () => {
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = 9;
 
-    const { data: eventsData, loading } = useFetch(getMyEvents, {
+    const { data: eventsData, loading, fn: refetch } = useFetch(getMyEvents, {
         args: [page, limit],
     });
     const events = eventsData?.events || [];
     const totalPages = eventsData?.totalPages || 1;
-
-    const { fn: deleteEventFn } = useFetch(deleteEvent, {
+    const { fn: deleteEventFn, loading: deleteLoading } = useFetch(deleteEvent, {
         autoFetch: false,
     });
 
-    const handleDelete = async (eventId: string) => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this event? This action cannot be undone and will permanently delete the event and all associated registrations."
-        );
-        if (!confirmed) return;
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+
+    const openDeleteDialog = (eventId: string) => {
+        setEventToDelete(eventId);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteConfirmed = async () => {
+        if (!eventToDelete) return;
         try {
-            await deleteEventFn(eventId);
+            await deleteEventFn(eventToDelete);
+            refetch(page, limit);
             toast.success("Event deleted successfully");
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete event");
+        } finally {
+            setDeleteDialogOpen(false);
+            setEventToDelete(null);
         }
     };
 
@@ -69,7 +87,7 @@ const MyEventPage = () => {
     }
 
     return (
-        <div className="min-h-screen pb-20 px-4">
+        <div className="pb-20 px-4">
             <div className="max-w-7xl mx-auto">
                 <div className="flex items-center justify-between mb-8">
                     <div>
@@ -103,9 +121,27 @@ const MyEventPage = () => {
                                     event={event}
                                     showActions={true}
                                     onClick={() => handleEventClick(event.id)}
-                                    onDelete={handleDelete}
+                                    onDelete={openDeleteDialog}
                                 />
                             ))}
+                            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+                                <DialogContent className='top-[20%]'>
+                                    <DialogHeader>
+                                        <DialogTitle>Delete Event?</DialogTitle>
+                                        <DialogDescription>
+                                            Are you sure you want to delete this event? This action cannot be undone and will permanently delete the event and all associated registrations.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="outline">Cancel</Button>
+                                        </DialogClose>
+                                        <Button variant="destructive" disabled={deleteLoading} className='disabled:opacity-50' onClick={handleDeleteConfirmed}>
+                                            <Trash2 className="w-4 h-4 mr-2" /> {deleteLoading ? "Deleting..." : "Delete"}
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         </div>
                         <div className="flex justify-center mt-8">
                             <Pagination>

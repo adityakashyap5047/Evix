@@ -4,7 +4,7 @@ import { cancelRegistration, getMyRegistrations } from "@/actions/registration";
 import EventCard from "@/components/event-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription, DialogClose } from "@/components/ui/dialog";
 import useFetch from "@/hooks/use-fetch";
 import { format } from "date-fns";
 import { Calendar, Loader2, MapPin, Ticket } from "lucide-react";
@@ -17,25 +17,34 @@ import { Registration } from "@/lib/Type";
 const TicketPage = () => {
     const [selectedTicket, setSelectedTicket] = useState<Registration | null>(null);
 
-    const {data: registrationsData, loading} = useFetch(getMyRegistrations);
+    const {data: registrationsData, loading, fn: refetchRegistrations} = useFetch(getMyRegistrations);
     const registrations = registrationsData?.registrations || [];
 
-    const {fn: cancelRegistrationFn} = useFetch(cancelRegistration, {
+    const {fn: cancelRegistrationFn, loading: cancelLoading} = useFetch(cancelRegistration, {
         autoFetch: false,
     })
-  const handleCancelRegistration = async (registrationId: string) => {
-    if (!window.confirm("Are you sure you want to cancel this registration?"))
-      return;
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [registrationToCancel, setRegistrationToCancel] = useState<string | null>(null);
 
+  const openCancelDialog = (registrationId: string) => {
+    setRegistrationToCancel(registrationId);
+    setCancelDialogOpen(true);
+  };
+
+  const handleCancelConfirmed = async () => {
+    if (!registrationToCancel) return;
     try {
-      await cancelRegistrationFn(registrationId);
+      await cancelRegistrationFn(registrationToCancel);
       toast.success("Registration cancelled successfully.");
+      setCancelDialogOpen(false);
+      setRegistrationToCancel(null);
+      refetchRegistrations();
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to cancel registration");
     }
   };
 
-  if (loading || !registrationsData) {
+  if (loading) {
       return (
           <div className="fixed inset-0 flex items-center justify-center">
               <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
@@ -55,7 +64,7 @@ const TicketPage = () => {
   );
 
     return (
-    <div className="min-h-screen pb-20 px-4">
+    <div className="pb-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">My Tickets</h1>
@@ -75,9 +84,27 @@ const TicketPage = () => {
                   event={registration.event}
                   showActions={true}
                   onClick={() => setSelectedTicket(registration as Registration)}
-                  onDelete={() => handleCancelRegistration(registration.id)}
+                  onDelete={() => openCancelDialog(registration.id)}
                 />
               ))}
+              <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                <DialogContent className="top-[20%]">
+                  <DialogHeader>
+                    <DialogTitle>Cancel Registration?</DialogTitle>
+                    <DialogDescription>
+                      Are you sure you want to cancel this registration? This action cannot be undone.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">No, keep registration</Button>
+                    </DialogClose>
+                    <Button variant="destructive" onClick={handleCancelConfirmed} disabled={cancelLoading} className="disabled:opacity-50">
+                      {cancelLoading ? "Cancelling..." : "Cancel Registration"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
         )}
@@ -93,7 +120,7 @@ const TicketPage = () => {
                   event={registration.event}
                   showActions={false}
                   className="opacity-60"
-                  onClick={() => setSelectedTicket(registration as Registration)}
+                  onClick={() => null}
                 />
               ))}
             </div>
