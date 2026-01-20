@@ -110,3 +110,93 @@ export async function checkRegistration(eventId: string){
         return { success: false, error: `Error occurred while checking registration for event: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
     }
 }
+
+export async function getMyRegistrations(){
+    try {
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const registrations = await db.registration.findMany({
+            where: {
+                userId: user?.id,
+            },
+            include: {
+                event: true,
+            },
+            orderBy: {
+                registeredAt: "desc"
+            }
+        });
+
+        if(!registrations || registrations.length === 0){
+            return { success: false, error: "No registrations found", status: 404 };
+        }
+
+        return { success: true, data: { registrations }, status: 200 };
+    } catch (error) {
+        return { success: false, error: `Error occurred while fetching registrations: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}
+
+export async function cancelRegistration(registrationId: string){
+    try {
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const registration = await db.registration.findUnique({
+            where: { id: registrationId }
+        });
+
+        if(!registration || registration.userId !== user.id){
+            return { success: false, error: "Registration not found or access denied", status: 404 };
+        }
+
+        const event = await db.event.findUnique({
+            where: { id: registration.eventId }
+        });
+
+        if(!event){
+            return { success: false, error: "Event not found", status: 404 };
+        }
+
+        await db.registration.update({
+            where: { id: registrationId },
+            data: { status: "CANCELLED" }
+        });
+
+        await db.event.update({
+            where: { id: event.id },
+            data: { 
+                registrationCount: Math.max(0, event.registrationCount - 1),
+             },
+        });
+
+        return { success: true, message: "Registration cancelled successfully", status: 200 };
+    } catch (error) {
+        return { success: false, error: `Error occurred while cancelling registration: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}
