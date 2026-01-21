@@ -351,7 +351,7 @@ export async function checkedInAttendee(qrCode: string){
             return { success: false, error: "Attendee already checked in", status: 400 };
         }
 
-        await db.registration.update({
+        const updatedRegistration = await db.registration.update({
             where: {
                 id: registration.id,
             },
@@ -361,7 +361,7 @@ export async function checkedInAttendee(qrCode: string){
             }
         });
 
-        return { success: true, data: { message: "Attendee checked in successfully", status: 200 }, status: 200 };
+        return { success: true, data: { registration: updatedRegistration, message: "Attendee checked in successfully", status: 200 }, status: 200 };
 
     } catch (error) {
         return { success: false, error: `Error occurred while checking attendee: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };

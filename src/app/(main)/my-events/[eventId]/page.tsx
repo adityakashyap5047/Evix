@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ArrowLeft, Calendar, CheckCircle, Clock, Download, Eye, Loader2, MapPin, QrCode, Search, Trash2, TrendingUp, Users } from "lucide-react";
 import Image from "next/image";
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AttendeeCard } from "../_components/attendee-card";
 import QRScannerModal from "../_components/qr-scanner-modal";
@@ -34,7 +34,13 @@ const EventDashboard = () => {
     const {data: registrationsData, loading: loadingRegistrations} = useFetch(getEventRegistration, {
         args: [eventId as string],
     });
-    const registrations = registrationsData?.registrations || [];
+    const [registrations, setRegistrations] = useState(registrationsData?.registrations || []);
+
+    useEffect(() => {
+      if (registrationsData?.registrations) {
+        queueMicrotask(() => setRegistrations(registrationsData.registrations));
+      }
+    }, [registrationsData]);
 
     const { fn: deleteEventFn, loading: isDeleting } = useFetch(deleteEvent, {
         autoFetch: false
@@ -99,27 +105,37 @@ const EventDashboard = () => {
         );
     }
 
-    const { event, stats } = dashboardData;
 
+    const { event } = dashboardData;
     if (!event) {
-        notFound();
+      notFound();
     }
 
 
-    // Filter registrations based on active tab and search
+    const totalRegistrations = registrations.filter(r => r.status === "CONFIRMED").length;
+    const checkedInCount = registrations.filter(r => r.checkedIn && r.status === "CONFIRMED").length;
+    const pendingCount = registrations.filter(r => !r.checkedIn && r.status === "CONFIRMED").length;
+    const checkInRate = totalRegistrations > 0 ? Math.round((checkedInCount / totalRegistrations) * 100) : 0;
+
+    const totalRevenue = dashboardData.stats?.totalRevenue ?? 0;
+    const capacity = dashboardData.stats?.capacity ?? 0;
+    const isEventToday = dashboardData.stats?.isEventToday ?? false;
+    const isEventPast = dashboardData.stats?.isEventPast ?? false;
+    const hoursUntilEvent = dashboardData.stats?.hoursUntilEvent ?? 0;
+
     const filteredRegistrations = registrations?.filter((reg) => {
-        const matchesSearch =
-            reg.attendeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            reg.attendeeEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            reg.qrCode.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch =
+        reg.attendeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        reg.attendeeEmail.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        reg.qrCode.toLowerCase().includes(searchQuery.toLowerCase());
 
-        if (activeTab === "all") return matchesSearch && reg.status === "CONFIRMED";
-        if (activeTab === "checked-in")
-            return matchesSearch && reg.checkedIn && reg.status === "CONFIRMED";
-        if (activeTab === "pending")
-            return matchesSearch && !reg.checkedIn && reg.status === "CONFIRMED";
+      if (activeTab === "all") return matchesSearch && reg.status === "CONFIRMED";
+      if (activeTab === "checked-in")
+        return matchesSearch && reg.checkedIn && reg.status === "CONFIRMED";
+      if (activeTab === "pending")
+        return matchesSearch && !reg.checkedIn && reg.status === "CONFIRMED";
 
-        return matchesSearch;
+      return matchesSearch;
     });
 
      return (
@@ -202,7 +218,7 @@ const EventDashboard = () => {
         </div>
 
         {/* Quick Actions - Show QR Scanner if event is today */}
-        {stats.isEventToday && !stats.isEventPast && (
+        {isEventToday && !isEventPast && (
           <Button
             size="lg"
             // variant="outline"
@@ -223,7 +239,7 @@ const EventDashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {stats.totalRegistrations}/{stats.capacity}
+                  {totalRegistrations}/{capacity}
                 </p>
                 <p className="text-sm text-muted-foreground">Capacity</p>
               </div>
@@ -236,7 +252,7 @@ const EventDashboard = () => {
                 <CheckCircle className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{stats.checkedInCount}</p>
+                <p className="text-2xl font-bold">{checkedInCount}</p>
                 <p className="text-sm text-muted-foreground">Checked In</p>
               </div>
             </CardContent>
@@ -249,7 +265,7 @@ const EventDashboard = () => {
                   <TrendingUp className="w-6 h-6 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">₹{stats.totalRevenue}</p>
+                  <p className="text-2xl font-bold">₹{totalRevenue}</p>
                   <p className="text-sm text-muted-foreground">Revenue</p>
                 </div>
               </CardContent>
@@ -261,7 +277,7 @@ const EventDashboard = () => {
                   <TrendingUp className="w-6 h-6 text-orange-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{stats.checkInRate}%</p>
+                  <p className="text-2xl font-bold">{checkInRate}%</p>
                   <p className="text-sm text-muted-foreground">Check-in Rate</p>
                 </div>
               </CardContent>
@@ -275,14 +291,14 @@ const EventDashboard = () => {
               </div>
               <div>
                 <p className="text-2xl font-bold">
-                  {stats.isEventPast
+                  {isEventPast
                     ? "Ended"
-                    : stats.hoursUntilEvent > 24
-                      ? `${Math.floor(stats.hoursUntilEvent / 24)}d`
-                      : `${stats.hoursUntilEvent}h`}
+                    : hoursUntilEvent > 24
+                      ? `${Math.floor(hoursUntilEvent / 24)}d`
+                      : `${hoursUntilEvent}h`}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {stats.isEventPast ? "Event Over" : "Time Left"}
+                  {isEventPast ? "Event Over" : "Time Left"}
                 </p>
               </div>
             </CardContent>
@@ -293,14 +309,14 @@ const EventDashboard = () => {
 
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value="all">
-                All ({stats.totalRegistrations})
+              <TabsTrigger value="all" className="cursor-pointer">
+                All ({totalRegistrations})
               </TabsTrigger>
-              <TabsTrigger value="checked-in">
-                Checked In ({stats.checkedInCount})
+              <TabsTrigger value="checked-in" className="cursor-pointer">
+                Checked In ({checkedInCount})
               </TabsTrigger>
-              <TabsTrigger value="pending">
-                Pending ({stats.pendingCount})
+              <TabsTrigger value="pending" className="cursor-pointer">
+                Pending ({pendingCount})
               </TabsTrigger>
             </TabsList>
 
@@ -330,6 +346,15 @@ const EventDashboard = () => {
                   <AttendeeCard
                     key={registration.id}
                     registration={registration}
+                    onCheckIn={updatedReg => {
+                      setRegistrations(prevRegs =>
+                        prevRegs.map(r =>
+                          r.id === updatedReg.id
+                            ? { ...updatedReg, checkedInAt: updatedReg.checkedInAt ?? null }
+                            : r
+                        )
+                      );
+                    }}
                   />
                 ))
               ) : (

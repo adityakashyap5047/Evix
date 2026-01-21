@@ -54,6 +54,7 @@ export default function RegisterModal({ event, isOpen, onClose }: {
             );
 
             setIsSuccess(true);
+            router.push("/my-tickets");
             toast.success("Registration successful! 🎉");
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Registration failed");

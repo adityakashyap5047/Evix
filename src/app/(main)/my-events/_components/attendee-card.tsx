@@ -5,27 +5,33 @@ import useFetch from "@/hooks/use-fetch";
 import { Registration } from "@/lib/Type";
 import { format } from "date-fns";
 import { CheckCircle, Circle, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export function AttendeeCard({ registration }: { registration: Registration }) {
+
+export function AttendeeCard({ registration, onCheckIn }: { registration: Registration, onCheckIn?: (reg: Registration) => void }) {
   const {fn: checkedInAttendeeFn, loading, data} = useFetch(checkedInAttendee, {
     autoFetch: false
   });
 
-  const [isCheckedIn, setIsCheckedIn] = useState(registration.checkedIn);
+  const [localReg, setLocalReg] = useState(registration);
+
+  useEffect(() => {
+    setLocalReg(registration);
+  }, [registration]);
 
   const handleManualCheckIn = async () => {
     try {
-      await checkedInAttendeeFn(registration.qrCode);
+      await checkedInAttendeeFn(localReg.qrCode);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to check in attendee");
     }
   };
 
-  if (data?.status === 200 && !isCheckedIn) {
-    setIsCheckedIn(true);
+  if(data?.status === 200 && !localReg.checkedIn){
     toast.success("Attendee checked in successfully");
+    setLocalReg(data.registration);
+    if (onCheckIn) onCheckIn(data.registration);
   }
 
   return (
@@ -33,10 +39,10 @@ export function AttendeeCard({ registration }: { registration: Registration }) {
       <CardContent className="p-4 flex items-start gap-4">
         <div
           className={`mt-1 p-2 rounded-full ${
-            registration.checkedIn ? "bg-green-100" : "bg-gray-100"
+            localReg.checkedIn ? "bg-green-100" : "bg-gray-100"
           }`}
         >
-          {registration.checkedIn ? (
+          {localReg.checkedIn ? (
             <CheckCircle className="w-5 h-5 text-green-600" />
           ) : (
             <Circle className="w-5 h-5 text-gray-400" />
@@ -44,22 +50,22 @@ export function AttendeeCard({ registration }: { registration: Registration }) {
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold mb-1">{registration.attendeeName}</h3>
+          <h3 className="font-semibold mb-1">{localReg.attendeeName}</h3>
           <p className="text-sm text-muted-foreground mb-2">
-            {registration.attendeeEmail}
+            {localReg.attendeeEmail}
           </p>
           <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
             <span>
-              {registration.checkedIn ? "⏰ Checked in" : "📅 Registered"}{" "}
-              {registration.checkedIn && registration.checkedInAt
-                ? format(registration.checkedInAt, "PPp")
-                : format(registration.registeredAt, "PPp")}
+              {localReg.checkedIn ? "⏰ Checked in" : "📅 Registered"}{" "}
+              {localReg.checkedIn && localReg.checkedInAt
+                ? format(localReg.checkedInAt, "PPp")
+                : format(localReg.registeredAt, "PPp")}
             </span>
-            <span className="font-mono">QR: {registration.qrCode}</span>
+            <span className="font-mono">QR: {localReg.qrCode}</span>
           </div>
         </div>
 
-        {!isCheckedIn ? (
+        {!localReg.checkedIn ? (
           <Button
             size="sm"
             variant="outline"
