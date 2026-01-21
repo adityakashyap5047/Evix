@@ -21,7 +21,14 @@ export function useOnboarding() {
     useEffect(() => {
         if (!isLoaded || !clerkUserId) return;
         const fetchData = async () => {
+            if (!clerkUserId) return; // Extra guard
             const response = await getCurrentUser();
+            // Suppress onboarding for unauthenticated users (401)
+            if (response.status === 401) {
+                setCurrentUser(null);
+                setShowOnboarding(false);
+                return;
+            }
             setCurrentUser(response.data?.user || null);
             if(!response.data?.user?.hasCompletedOnboarding){
                 const requiresOnboarding = ATTENDEE_PAGES.some((page) =>
@@ -36,7 +43,13 @@ export function useOnboarding() {
     }, [isLoaded, clerkUserId, pathname]);
 
     const fetchData = async () => {
+        if (!clerkUserId) return; // Extra guard
         const response = await getCurrentUser();
+        if (response.status === 401) {
+            setCurrentUser(null);
+            setShowOnboarding(false);
+            return;
+        }
         setCurrentUser(response.data?.user || null);
     };
 

@@ -21,24 +21,30 @@ import RegisterModal from "../_components/register-modal";
 const EventPage = () => {
     const params = useParams();
     const router = useRouter();
-    const { user } = useUser();
-    const [showRegisterModal, setShowRegisterModal] = useState(false);
+        const { user, isSignedIn } = useUser();
+        const [showRegisterModal, setShowRegisterModal] = useState(false);
 
-    const slug: string = params.slug! as string;
-    const { data: eventData, loading } = useFetch(getEventBySlug, {
-        args: [slug]
-    });
-    const event = eventData?.event;
-    
-    const eventId = event?.id ?? "";
-    const { data: registrationData, loading: isRegistrationLoading } = useFetch(checkRegistration, {
-        args: [eventId],
-    });
-    const isRegistered = registrationData?.isRegistered;
+        const slug: string = params.slug! as string;
+        const { data: eventData, loading } = useFetch(getEventBySlug, {
+                args: [slug]
+        });
+        const event = eventData?.event;
+
+        const eventId = event?.id ?? "";
+        // Only check registration if user is signed in
+        const { data: registrationData, loading: isRegistrationLoading } = useFetch(
+            checkRegistration,
+            {
+                args: [eventId],
+                skip: !isSignedIn || !eventId,
+                suppressToast: true,
+            }
+        );
+        const isRegistered = registrationData?.isRegistered;
 
     if (loading || !eventData) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center">
+            <div className="flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             </div>
         );
@@ -63,7 +69,7 @@ const EventPage = () => {
     }
 
     const handleRegister = () => {
-        if (!user) {
+        if (!isSignedIn) {
             toast.error("Please sign in to register");
             return;
         }

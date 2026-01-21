@@ -43,6 +43,7 @@ const Page = () => {
 
     const { data: events, loading: loadingEvents } = useFetch(fetchFn, {
         args: [slug as string, city, state, isCategory, 1, 10],
+        suppressToast: true,
     });
 
     const handleEventClick = (slug: string) => {
@@ -51,7 +52,7 @@ const Page = () => {
 
     if (loadingEvents) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center">
+            <div className="flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             </div>
         );

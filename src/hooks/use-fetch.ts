@@ -14,13 +14,14 @@ const useFetch = <T, Args extends unknown[] = unknown[]>(
     options: {
         autoFetch?: boolean;
         args?: Args;
+        suppressToast?: boolean;
     } = {},
 ) => {
     const [data, setData] = useState<T | undefined>(undefined);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const { autoFetch = true, args = [] as unknown as Args } = options;
+    const { autoFetch = true, args = [] as unknown as Args, suppressToast = false } = options;
 
     const fn = useCallback(
         async (...params: Args) => {
@@ -32,12 +33,16 @@ const useFetch = <T, Args extends unknown[] = unknown[]>(
                     setData(response.data);
                 } else {
                     setError(response?.error || "An error occurred");
-                    toast.error(response?.error || "An error occurred");
+                    if (!suppressToast) {
+                        toast.error(response?.error || "An error occurred");
+                    }
                 }
             } catch (err) {
                 const msg = err instanceof Error ? err.message : "An error occurred";
                 setError(msg);
-                toast.error(msg);
+                if (!suppressToast) {
+                    toast.error(msg);
+                }
             } finally {
                 setLoading(false);
             }

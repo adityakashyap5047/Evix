@@ -289,7 +289,7 @@ const Page = () => {
 
               <div className="hidden lg:block">
                 <div className="rounded-2xl border border-white/5 bg-black/10 p-6">
-                  <p className="text-gray-400 font-light text-sm flex items-center gap-2"><Image src={"/evix.png"} alt='Evix' width={30} height={30} /> Evix highlights</p>
+                  <p className="text-gray-400 font-light text-sm flex items-center gap-2"><Image src={"/Evix.png"} alt='Evix' width={30} height={30} /> Evix highlights</p>
                   <ul className="mt-4 space-y-3 text-gray-300 font-light">
                     <li>• Minimal & premium UI</li>
                     <li>• Ultra-fast event booking</li>

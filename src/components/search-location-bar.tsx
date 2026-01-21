@@ -25,11 +25,12 @@ const SearchLocationBar = () => {
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
 
-  const { data: currentUserData, loading: isLoading } = useFetch(getCurrentUser);
+  const { data: currentUserData, loading: isLoading } = useFetch(getCurrentUser, { suppressToast: true });
   const currentUser: User | null = currentUserData?.user || null;
 
   const { fn: getEvents } = useFetch(getEventsByLocation, {
     autoFetch: false,
+    suppressToast: true,
   })
 
   const searchArgs = searchQuery.trim().length >= 2 ? searchQuery : "skip"

@@ -36,6 +36,7 @@ export default function RegisterModal({ event, isOpen, onClose }: {
 
     const { fn: registerForEventFn, loading: isLoading } = useFetch(registerForEvent, {
         autoFetch: false,
+        suppressToast: true,
     })
 
     const handleSubmit = async (e: React.FormEvent) => {

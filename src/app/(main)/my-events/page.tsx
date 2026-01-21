@@ -11,7 +11,7 @@ export default function Page() {
 
 function MyEventsLoading() {
   return (
-    <div className="fixed inset-0 flex items-center justify-center">
+    <div className="flex items-center justify-center">
       <div className="animate-spin h-8 w-8 rounded-full border-2 border-white/20 border-t-purple-500" />
     </div>
   );

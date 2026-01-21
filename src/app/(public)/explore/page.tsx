@@ -32,7 +32,7 @@ const Page = () => {
     const plugin = useRef(Autoplay({ delay: 3000, stopOnInteraction: true }));
     const router = useRouter();
 
-    const { data: currentUserData } = useFetch(getCurrentUser);
+    const { data: currentUserData } = useFetch(getCurrentUser, { suppressToast: true });
     const currentUser: User | null = currentUserData?.user || null;
 
     const { data: featuredEvents, loading: loadingFeaturedEvents } = useFetch(
@@ -53,6 +53,7 @@ const Page = () => {
                 1,
                 4,
             ],
+            suppressToast: true,
         },
     );
 
@@ -92,7 +93,7 @@ const Page = () => {
 
     if (isLoading) {
         return (
-            <div className="fixed inset-0 flex items-center justify-center">
+            <div className="flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
             </div>
         );

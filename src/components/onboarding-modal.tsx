@@ -55,6 +55,7 @@ export function OnboardingModal({ isOpen, onClose, onComplete }: {
 
   const { fn: completeOnboardingFn, loading } = useFetch(completeOnboarding, {
     autoFetch: false,
+    suppressToast: true,
   })
 
   const handleComplete = async () => {
