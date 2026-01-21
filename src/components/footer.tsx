@@ -1,29 +1,22 @@
 import Link from "next/link";
 import {
-  Instagram,
   Linkedin,
-  Twitter,
   Github,
   Mail,
-  ArrowRight,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-black/30">
-      {/* Glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.18),transparent_55%)]" />
-      <div className="pointer-events-none absolute -top-32 -left-32 h-72 w-72 rounded-full bg-purple-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-32 -right-32 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
-
-      <div className="relative max-w-7xl mx-auto px-6 py-16">
+    <footer className="overflow-hidden border-t border-t-white/5">
+      
+      <div className="relative max-w-7xl mx-auto px-6 pb-16">
         <div className="mt-14 grid gap-12 xs:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-1">
+              <Image src={"/evix.png"} alt="Evix" width={30} height={30} />
               <span className="text-2xl font-semibold tracking-tight">
-                evix<span className="text-purple-400">*</span>
+                Evix<span className="text-purple-400">*</span>
               </span>
             </Link>
 
@@ -35,23 +28,22 @@ const Footer = () => {
 
             <div className="mt-6 flex items-center gap-2 text-sm text-gray-400">
               <Mail className="w-4 h-4" />
-              <a href="mailto:support@evix.com" className="hover:text-white transition">
-                support@evix.com
+              <a href="mailto:adityakashyap5047@gmail.com" className="hover:text-white transition">
+                adityakashyap5047@gmail.com
               </a>
             </div>
 
             <div className="mt-6 flex items-center gap-3">
               {[
-                { icon: Twitter, label: "Twitter" },
-                { icon: Instagram, label: "Instagram" },
-                { icon: Linkedin, label: "LinkedIn" },
-                { icon: Github, label: "GitHub" },
+                { icon: Mail, label: "Mail", link: "mailto:adityakashyap5047@gmail.com" },
+                { icon: Linkedin, label: "LinkedIn", link: "https://www.linkedin.com/in/adityakashyap5047/" },
+                { icon: Github, label: "GitHub", link: "https://github.com/adityakashyap5047" },
               ].map((s) => (
                 <a
                   key={s.label}
-                  href="#"
+                  href={s.link}
                   aria-label={s.label}
-                  className="w-11 h-11 rounded-2xl border border-white/10 bg-white/[0.03] flex items-center justify-center hover:bg-white/[0.06] hover:-translate-y-0.5 transition"
+                  className="w-11 h-11 rounded-2xl border border-white/10 bg-white/3 flex items-center justify-center hover:bg-white/6 hover:-translate-y-0.5 transition"
                 >
                   <s.icon className="w-5 h-5 text-gray-300" />
                 </a>
