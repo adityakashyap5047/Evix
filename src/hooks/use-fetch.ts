@@ -47,7 +47,7 @@ const useFetch = <T, Args extends unknown[] = unknown[]>(
                 setLoading(false);
             }
         },
-        [cb],
+        [cb, suppressToast],
     );
 
     useEffect(() => {

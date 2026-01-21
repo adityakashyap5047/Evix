@@ -31,12 +31,10 @@ const EventPage = () => {
         const event = eventData?.event;
 
         const eventId = event?.id ?? "";
-        // Only check registration if user is signed in
         const { data: registrationData, loading: isRegistrationLoading } = useFetch(
             checkRegistration,
             {
                 args: [eventId],
-                skip: !isSignedIn || !eventId,
                 suppressToast: true,
             }
         );
