@@ -8,13 +8,13 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="overflow-hidden border-t border-t-white/5">
+    <footer className="overflow-hidden mt-4 border-t border-t-white/5">
       
       <div className="relative max-w-7xl mx-auto px-6 pb-16">
         <div className="mt-14 grid gap-12 xs:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link href="/" className="inline-flex items-center gap-1">
-              <Image src={"/evix.png"} alt="Evix" width={30} height={30} />
+              <Image src={"/Evix.png"} alt="Evix" width={30} height={30} />
               <span className="text-2xl font-semibold tracking-tight">
                 Evix<span className="text-purple-400">*</span>
               </span>
