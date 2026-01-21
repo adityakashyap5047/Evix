@@ -161,7 +161,7 @@ const TicketPage = () => {
                   {selectedTicket.attendeeName}
                 </p>
                 <p className="text-sm text-muted-foreground mb-4">
-                  {selectedTicket.event.title}
+                  {selectedTicket.event?.title}
                 </p>
               </div>
 
@@ -178,17 +178,17 @@ const TicketPage = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
                   <span>
-                    {format(selectedTicket.event.startDate, "PPP, h:mm a")}
+                    {format(selectedTicket.event?.startDate ?? new Date(), "PPP, h:mm a")}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" />
                   <span>
-                    {selectedTicket.event.locationType === "ONLINE"
+                    {selectedTicket.event?.locationType === "ONLINE"
                       ? "Online Event"
-                      : `${selectedTicket.event.city}, ${
-                          selectedTicket.event.state ||
-                          selectedTicket.event.country
+                      : `${selectedTicket.event?.city}, ${
+                          selectedTicket.event?.state ||
+                          selectedTicket.event?.country
                         }`}
                   </span>
                 </div>

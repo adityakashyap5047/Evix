@@ -62,9 +62,9 @@ export type Event = {
 
 export type Registration = {
 	id: string;
-	event: Event;
+	event?: Event;
 	eventId: string;
-	user: User;
+	user?: User;
 	userId: string;
 	attendeeName: string;
 	attendeeEmail: string;

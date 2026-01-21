@@ -200,3 +200,47 @@ export async function cancelRegistration(registrationId: string){
         return { success: false, error: `Error occurred while cancelling registration: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
     }
 }
+
+export async function getEventRegistration(eventId: string){
+    try {
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const event = await db.event.findUnique({
+            where: { 
+                id: eventId,
+                organizerId: user.id, 
+            }
+        });
+
+        if(!event){
+            return { success: false, error: "Event not found or access denied", status: 404 };
+        };
+
+        const registrations = await db.registration.findMany({
+            where: {
+                eventId: eventId,
+            },
+        });
+
+        if(!registrations || registrations.length === 0){
+            return { success: false, error: "No registrations found for this event", status: 404 };
+        }
+
+        return { success: true, data: { registrations }, status: 200 };
+    } catch (error) {
+        return { success: false, error: `Error occurred while fetching registration for event: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}

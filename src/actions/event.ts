@@ -229,3 +229,141 @@ export async function getMyEvents(page: number = 1, limit: number = 10){
         return { success: false, error: `Error occurred while fetching events: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
     }
 }
+
+export async function getEventDashboard(eventId: string){
+    try {
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const event = await db.event.findUnique({
+            where: {
+                id: eventId,
+                organizerId: user?.id,
+            },
+            include: {
+                organizer: true,
+            }
+        });
+
+        if(!event){
+            return { success: false, error: "Event not found or you don't have permission to view this event", status: 404 };
+        }
+
+        const registrations = await db.registration.findMany({
+            where: {
+                eventId: event.id,
+            }
+        });
+
+        const totalRegistrations = registrations.filter(r => r.status === "CONFIRMED").length;
+        const checkedInCount = registrations.filter(r => r.checkedIn && r.status === "CONFIRMED").length;
+        const pendingCount = totalRegistrations - checkedInCount;
+
+        let totalRevenue = 0;
+        if(event.ticketType === "PAID" && event.ticketPrice){
+            totalRevenue = checkedInCount * event.ticketPrice;
+        }
+
+        const checkInRate = totalRegistrations > 0 ? Math.round((checkedInCount / totalRegistrations) * 100) : 0;
+
+        const now = Date.now();
+        const timeUntilEvent = event.startDate.getTime() - now;
+        const hoursUntilEvent = Math.max(0, Math.floor(timeUntilEvent / (1000 * 60 * 60)));
+        const today = new Date().setHours(0,0,0,0);
+        const startDay = new Date(event.startDate).setHours(0,0,0,0);
+        const endDay = new Date(event.endDate).setHours(0,0,0,0);
+        const isEventToday = startDay <= today && today <= endDay;
+        const isEventPast = event.endDate.getTime() < now;
+
+        return {
+            success: true,
+            data: {
+                event,
+                stats: {
+                    totalRegistrations,
+                    checkedInCount,
+                    pendingCount,
+                    capacity: event.capacity,
+                    checkInRate,
+                    totalRevenue,
+                    hoursUntilEvent,
+                    isEventToday,
+                    isEventPast
+                }
+            }
+        }
+    } catch (error) {
+        return { success: false, error: `Error occurred while fetching event dashboard: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}
+
+export async function checkedInAttendee(qrCode: string){
+    try {
+        const currUser = await currentUser();
+        if(!currUser || !currUser.id){
+            return { success: false, error: "User not authenticated", status: 401 };
+        }
+
+        const user = await db.user.findUnique({
+            where: {
+                clerkUserId: currUser?.id,
+            },
+        });
+
+        if(!user){
+            return { success: false, error: "User not found", status: 404 };
+        }
+
+        const registration = await db.registration.findFirst({
+            where: {
+                qrCode: qrCode,
+            },
+        });
+        
+        if(!registration){
+            return { success: false, error: "Registration not found", status: 404 };
+        }
+        
+        const event = await db.event.findUnique({
+            where: {
+                id: registration.eventId,
+                organizerId: user?.id,
+            }
+        })
+
+        if(!event){
+            return { success: false, error: "Event not found or you don't have permission to check-in attendees for this event", status: 404 };
+        }
+
+        if(registration.checkedIn){
+            return { success: false, error: "Attendee already checked in", status: 400 };
+        }
+
+        await db.registration.update({
+            where: {
+                id: registration.id,
+            },
+            data: {
+                checkedIn: true,
+                checkedInAt: new Date(),
+            }
+        });
+
+        return { success: true, data: { message: "Attendee checked in successfully", status: 200 }, status: 200 };
+
+    } catch (error) {
+        return { success: false, error: `Error occurred while checking attendee: ${error instanceof Error ? error.message : 'Unknown error'}`, status: 500 };
+    }
+}
