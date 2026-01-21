@@ -5,23 +5,28 @@ import useFetch from "@/hooks/use-fetch";
 import { Registration } from "@/lib/Type";
 import { format } from "date-fns";
 import { CheckCircle, Circle, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export function AttendeeCard({ registration }: { registration: Registration }) {
-    const {data, fn: checkedInAttendeeFn, loading} = useFetch(checkedInAttendee, {
-        autoFetch: false
-    });
+  const {fn: checkedInAttendeeFn, loading, data} = useFetch(checkedInAttendee, {
+    autoFetch: false
+  });
+
+  const [isCheckedIn, setIsCheckedIn] = useState(registration.checkedIn);
 
   const handleManualCheckIn = async () => {
     try {
       await checkedInAttendeeFn(registration.qrCode);
-      if (data?.status === 200) {
-        toast.success("Attendee checked in successfully");
-      }
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to check in attendee");
     }
   };
+
+  if (data?.status === 200 && !isCheckedIn) {
+    setIsCheckedIn(true);
+    toast.success("Attendee checked in successfully");
+  }
 
   return (
     <Card className="py-0">
@@ -54,7 +59,7 @@ export function AttendeeCard({ registration }: { registration: Registration }) {
           </div>
         </div>
 
-        {!registration.checkedIn && (
+        {!isCheckedIn ? (
           <Button
             size="sm"
             variant="outline"
@@ -71,7 +76,18 @@ export function AttendeeCard({ registration }: { registration: Registration }) {
               </>
             )}
           </Button>
-        )}
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleManualCheckIn}
+            disabled={true}
+            className="gap-2 disabled:opacity-100"
+          >
+            <CheckCircle className="w-4 h-4 text-green-400" />
+            Checked In
+          </Button>
+        )} 
       </CardContent>
     </Card>
   );

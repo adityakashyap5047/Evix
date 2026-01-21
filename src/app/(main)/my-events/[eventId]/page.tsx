@@ -28,7 +28,7 @@ const EventDashboard = () => {
     const [showQRScanner, setShowQRScanner] = useState(false);
 
     const {data: dashboardData, loading} = useFetch(getEventDashboard, {
-        args: [eventId as string],
+      args: [eventId as string],
     });
 
     const {data: registrationsData, loading: loadingRegistrations} = useFetch(getEventRegistration, {
@@ -288,63 +288,66 @@ const EventDashboard = () => {
             </CardContent>
           </Card>
         </div>
+        {registrations && registrations.length > 0 ? <>
+          <h2 className="text-2xl font-bold mb-4">Attendee Management</h2>
 
-        {/* Attendee Management */}
-        <h2 className="text-2xl font-bold mb-4">Attendee Management</h2>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="all">
+                All ({stats.totalRegistrations})
+              </TabsTrigger>
+              <TabsTrigger value="checked-in">
+                Checked In ({stats.checkedInCount})
+              </TabsTrigger>
+              <TabsTrigger value="pending">
+                Pending ({stats.pendingCount})
+              </TabsTrigger>
+            </TabsList>
 
-        {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-4">
-            <TabsTrigger value="all">
-              All ({stats.totalRegistrations})
-            </TabsTrigger>
-            <TabsTrigger value="checked-in">
-              Checked In ({stats.checkedInCount})
-            </TabsTrigger>
-            <TabsTrigger value="pending">
-              Pending ({stats.pendingCount})
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Search and Actions */}
-          <div className="flex gap-3 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by name, email, or QR code..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={handleExportCSV}
-              className="gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Export CSV
-            </Button>
-          </div>
-
-          <TabsContent value={activeTab} className="space-y-3 mt-0">
-            {filteredRegistrations && filteredRegistrations.length > 0 ? (
-              filteredRegistrations.map((registration) => (
-                <AttendeeCard
-                  key={registration.id}
-                  registration={registration}
+            <div className="flex gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by name, email, or QR code..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
                 />
-              ))
-            ) : (
-              <div className="text-center py-12 text-muted-foreground">
-                No attendees found
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
+              <Button
+                variant="outline"
+                onClick={handleExportCSV}
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Export CSV
+              </Button>
+            </div>
+
+            <TabsContent value={activeTab} className="space-y-3 mt-0">
+              {filteredRegistrations && filteredRegistrations.length > 0 ? (
+                filteredRegistrations.map((registration) => (
+                  <AttendeeCard
+                    key={registration.id}
+                    registration={registration}
+                  />
+                ))
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  No attendees found
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </> : (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <Users className="w-12 h-12 mb-4" />
+            <h2 className="text-xl font-semibold mb-2">No attendees yet</h2>
+            <p className="mb-4">Once people register for your event, they’ll appear here.</p>
+          </div>
+        )}
       </div>
 
-      {/* QR Scanner Modal */}
       {showQRScanner && (
         <QRScannerModal
           isOpen={showQRScanner}
