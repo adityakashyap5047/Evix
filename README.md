@@ -1,10 +1,5 @@
 
-<div align="center">
-	<img src="/public/Evix.png" alt="Evix Logo" width="120" />
-</div>
-
-# Evix — Event Management Platform
-
+# <img src="/public/Evix.png" alt="Evix Logo" width="30" /> Evix — Event Management Platform
 
 Evix is a modern event management platform that enables users to discover, create, and manage events efficiently. Organizers can host meetups, concerts, workshops, and more, while attendees can register and access tickets with QR codes.
 
@@ -12,15 +7,16 @@ Evix is a modern event management platform that enables users to discover, creat
 
 ## Screenshots
 
+### Code Example <br/>
 <div align="center">
-	<b>Code Example</b><br/>
 	<img src="/public/Code/code-1.png" alt="Code Screenshot 1" width="350" />
 	<img src="/public/Code/code-2.png" alt="Code Screenshot 2" width="350" />
 	<img src="/public/Code/code-3.png" alt="Code Screenshot 3" width="350" />
 </div>
 
+
+### Evix Responsive UI <br/>
 <div align="center">
-	<b>Evix Responsive UI</b><br/>
 	<img src="/public/Evix/evix-1.png" alt="Evix Screenshot 1" width="250" />
 	<img src="/public/Evix/evix-2.png" alt="Evix Screenshot 2" width="250" />
 	<img src="/public/Evix/evix-3.png" alt="Evix Screenshot 3" width="250" />
@@ -30,7 +26,6 @@ Evix is a modern event management platform that enables users to discover, creat
 	<img src="/public/Evix/evix-7.png" alt="Evix Screenshot 7" width="250" />
 </div>
 
----
 
 ---
 
@@ -85,8 +80,6 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
 CLERK_SECRET_KEY=your_clerk_secret_key
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
 # Unsplash API
 NEXT_PUBLIC_UNSPLASH_ACCESS_KEY=your_unsplash_access_key
