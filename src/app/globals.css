@@ -133,3 +133,7 @@
 .cl-internal-15hkgn2 {
   background: #212732 !important;
 }
+
+@theme {
+  --breakpoint-xs: 420px;
+}
